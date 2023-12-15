@@ -1,0 +1,69 @@
+1. 회원가입
+2. 로그인
+3. 회원정보 수정
+4. 방 예약
+5. 예약 변경
+6. 회원가입 중복회원 검사
+7. 방 예약 유효성 검사
+8. 예약 삭제
+9. 회원 삭제
+
+org.springframework.web.servlet.DispatcherServlet
+https://docs.spring.io/spring-framework/
+
+==============================================================================================
+
+xml을 이용한 값처리 복습
+
+**
+Test1~3
+BMI 비만도검사 / 계산service에 리턴값을 줄필요가 있는가?
+
+==============================================================================================
+
+==============================================================================================
+sInterceptor 복습
+
+메인화면 HomeController => MemberController(get) => login.jsp
+
+< login.jsp >
+로그인 MemberController(post) => MessageController => message.jsp => MemberController => memberMain.jsp
+- post방식으로 멤버 컨트롤러에서 level, mid, pwd값을 받아옴, mid와 pwd를 if문으로 유효성을 검사해 참이라면 받아온 모든 값을
+세션 생성한다 이후 받아온 mid를 메세지 컨트롤러에 보내고 메세지 컨트롤러에서 msg와 url을 변수설정해 메세지jsp에 넘겨주어 
+alert출력후 url주소값으로 location 이동한다..
+
+회원가입 MemberController => join.jsp
+방명록리스트 / 글올리기 GuestController => guestList.jsp => GuestController => guestInput.jsp
+
+< memberMain.jsp >
+홈 MemberController => memberMain.jsp
+방명록리스트 / 글올리기 GuestController => guestList.jsp => GuestController => guestInput.jsp
+게시판리스트 / 글올리기 BoardController => boardList.jsp => BoardController => boardInput.jsp
+자료실리스트 / 글올리기 PdsController => pdsList.jsp => PdsController => pdsinput.jsp
+
+로그아웃 MemberController => MessageController => message.jsp => MemberController => login.jsp
+- 세션을 생성해 세션값 sMid를 변수지정후 세션을 종료한다 변수지정한 mid를 메세지 컨트롤러에 넘겨주어 msg와 url을 변수설정해
+메세지 jsp에 넘겨주고 실행, url주소로 이동한다..
+
+==============================================================================================
+
+sql문 복습
+
+servlet-Interceptor / web.xml 설정
+login.jsp => 설명
+
+super key 테이블 유니크하게 식별..
+candidate key 없으면 식별 불가
+
+함수 종속성 두개를 묶어 고유키로..
+
+==============================================================================================
+
+sTiles => 프론트 Tiles을 이용한 레이아웃 
+springSecurity => 비밀번호 암호화
+sMavenProject => 옛 버전의 스프링 컨트롤러
+sInterceptor 1, 2 => 인터셉트 제어
+sExam => 현 스프링 컨트롤러, 다양한 값전달 방식, 자바복습 및 xml을 이용한 값 이동, 저장파일위치변수화, sql문 심화
+javaProjectS => 스프링 전체 구조방식, 부트스트랩 스타일
+
+==============================================================================================
