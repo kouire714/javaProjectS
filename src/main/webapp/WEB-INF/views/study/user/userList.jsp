@@ -7,11 +7,33 @@
 	<meta charset="UTF-8">
 	<title>userList.jsp</title>
 	<jsp:include page="/WEB-INF/views/include/bs4.jsp" />
+	<script>
+		'use strict';
+		
+		function userDelete(idx) {
+			let ans = confirm("선택된 user를 삭제하시겠습니까?");
+			if(!ans) return false;
+			else location.href = "userDelete?idx="+idx;
+		}
+		
+		function nameSearch() {
+			let name = document.getElementById("name").value;
+			location.href = "userSearch?name="+name;
+		}
+		
+	</script>
 </head>
 <body>
+<jsp:include page="/WEB-INF/views/include/nav.jsp" />
+<jsp:include page="/WEB-INF/views/include/slide2.jsp" />
 <p><br/></p>
 <div class="container">
 	<h2>회 원 리 스 트</h2>
+	<div>
+		개별검색 : 
+		<input type="text" name="name" id="name">
+		<input type="button" value="검색" onclick="nameSearch()" class="btn btn-success"/>
+	</div>
 	<table class="table table-hover">
 		<tr class="table-dark text-dark">
 			<th>번호</th>
@@ -36,5 +58,6 @@
 	<div><a href="${ctp}/" class="btn btn-warning">돌아가기</a></div>
 </div>
 <p><br/></p>
+<jsp:include page="/WEB-INF/views/include/footer.jsp"/>
 </body>
 </html>

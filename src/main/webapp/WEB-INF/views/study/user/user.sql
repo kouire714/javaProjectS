@@ -13,3 +13,12 @@ create table user (
 desc user;
 
 select * from user;
+
+insert into user values (default,'aaaa', '에에에', 22, '서울');
+insert into user values (default,'bbbb', '비비비', 23, '청주');
+insert into user values (default,'cccc', '씨씨씨', 24, '제주');
+
+delete from user where idx = 11;
+
+select * from user where name like '%에%' order by idx desc;
+select * from user where name like concat('%', '에', '%') order by idx desc;
