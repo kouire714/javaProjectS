@@ -14,4 +14,8 @@
   	insert into member2 values (default,#{vo.mid},#{vo.pwd},#{vo.nickName},#{vo.name},#{vo.gender},#{vo.birthday},#{vo.tel},#{vo.address},#{vo.email},#{vo.homePage},#{vo.job},#{vo.hobby},#{vo.photo},#{vo.content},#{vo.userInfor},default,default,default,default,default,default,default);
   </insert>
   
+  <delete id="setMemberDeleteUpdate">
+  	delete from member2 where mid = #{mid};
+  </delete>
+  
 </mapper>

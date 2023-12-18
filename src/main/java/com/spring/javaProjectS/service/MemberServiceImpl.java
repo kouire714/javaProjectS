@@ -29,5 +29,10 @@ public class MemberServiceImpl implements MemberService {
 		
 		return memberDAO.setMemberJoinOk(vo);
 	}
+
+	@Override
+	public int setMemberDeleteUpdate(String mid) {
+		return memberDAO.setMemberDeleteUpdate(mid);
+	}
 	
 }

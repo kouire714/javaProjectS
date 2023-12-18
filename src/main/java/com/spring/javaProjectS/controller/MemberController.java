@@ -53,7 +53,7 @@ public class MemberController {
 		MemberVO vo = memberService.getMemberIdCheck(mid);
 		
 		if(vo != null && vo.getUserDel().equals("NO") && passwordEncoder.matches(pwd, vo.getPwd())) {
-
+			
 			// 1.세션처리
 			String strLevel = "";
 			if(vo.getLevel() == 0) strLevel = "관리자";
@@ -146,5 +146,16 @@ public class MemberController {
 		
 		if(vo != null) return "1";
 		else return "0";
+	}
+	
+	@RequestMapping(value="/memberDeleteUpdate", method = RequestMethod.GET)
+	public String memberDeleteGet(HttpSession session) {
+		String mid = (String) session.getAttribute("sMid");
+		
+		int res = memberService.setMemberDeleteUpdate(mid);
+		
+		if (res == 1) return "redirect:/message/memberDeleteOk";
+		else return "redirect:/message/memberDeleteNo";
+		
 	}
 }

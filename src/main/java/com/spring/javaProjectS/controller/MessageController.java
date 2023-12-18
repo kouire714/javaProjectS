@@ -93,6 +93,14 @@ public class MessageController {
 			model.addAttribute("msg", "회원 가입 실패~~");
 			model.addAttribute("url", "member/memberJoin");
 		}
+		else if(msgFlag.equals("memberDeleteOk")) {
+			model.addAttribute("msg","회원 탈퇴 되었습니다.");
+			model.addAttribute("url","member/memberLogin");
+		}
+		else if(msgFlag.equals("memberDeleteNo")) {
+			model.addAttribute("msg","회원 탈퇴 실패~~");
+			model.addAttribute("url","member/memberLogin");
+		}
 		
 		return "include/message";
 	}

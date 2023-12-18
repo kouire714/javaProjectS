@@ -10,4 +10,6 @@ public interface MemberService {
 
 	public int setMemberJoinOk(MemberVO vo);
 
+	public int setMemberDeleteUpdate(String mid);
+
 }

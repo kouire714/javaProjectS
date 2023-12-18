@@ -39,7 +39,7 @@
 	    <a href="${ctp}/user2/user2List" class="w3-bar-item w3-button">회원리스트</a>
 	    <a href="#" class="w3-bar-item w3-button">비밀번호변경</a>
 	    <a href="#" class="w3-bar-item w3-button">회원정보수정</a>
-	    <a href="#" class="w3-bar-item w3-button">회원탈퇴</a>
+	    <a href="${ctp}/member/memberDeleteUpdate" class="w3-bar-item w3-button">회원탈퇴</a>
 	    <a href="#" class="w3-bar-item w3-button">관리자</a>
       </div>
     </div>
