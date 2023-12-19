@@ -1,19 +1,30 @@
 package com.spring.javaProjectS.controller;
 
+import java.util.UUID;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 
 import com.spring.javaProjectS.service.MemberService;
+import com.spring.javaProjectS.vo.MailVO;
 import com.spring.javaProjectS.vo.MemberVO;
 
 @Controller
@@ -25,6 +36,9 @@ public class MemberController {
 	
 	@Autowired
 	BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	JavaMailSender mailSender;
 	
 	// 회원 로그인폼 보여주기
 	@RequestMapping(value = "/memberLogin", method = RequestMethod.GET)
@@ -149,13 +163,88 @@ public class MemberController {
 	}
 	
 	@RequestMapping(value="/memberDeleteUpdate", method = RequestMethod.GET)
-	public String memberDeleteGet(HttpSession session) {
+	public String memberDeleteUpdateGet(HttpSession session) {
 		String mid = (String) session.getAttribute("sMid");
 		
 		int res = memberService.setMemberDeleteUpdate(mid);
 		
 		if (res == 1) return "redirect:/message/memberDeleteOk";
 		else return "redirect:/message/memberDeleteNo";
-		
 	}
+	
+	@RequestMapping(value="/memberPwdUpdate", method = RequestMethod.GET)
+	public String MemberPwdUpdateGet() {
+		return "member/memberPwdUpdate";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="/memberPwdUpdate", method = RequestMethod.POST)
+	public String MemberPwdUpdatePost(HttpSession session, String pwd) {
+		
+		String mid = (String) session.getAttribute("sMid");
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+				
+		String res = "0"; 
+		if(passwordEncoder.matches(pwd,vo.getPwd())) res = "1";
+		
+		
+		return res;
+	}
+	
+	// 비밀번호 찾기
+	@ResponseBody
+	@RequestMapping(value = "/memberPasswordSearch", method = RequestMethod.POST)
+	public String memberPasswordSearchPost(String mid, String email) throws MessagingException {
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		if(vo != null && vo.getEmail().equals(email)) {
+			// 정보 확인 후, 임시 비밀번호를 발급받아서 메일로 전송처리 한다.
+			UUID uid = UUID.randomUUID();
+			String pwd = uid.toString().substring(0,8);
+			
+			// 발급받은 비밀번호를 암호화 후 DB에 저장한다.
+			memberService.setMemberPasswordUpdate(mid, passwordEncoder.encode(pwd));
+			
+			// 발급받은 임시번호를 회원 메일주소로 전송처리한다.
+			String title = "임시 비밀번호를 발급하였습니다.";
+			String mailFlag= "임시 비밀번호 : " + pwd;
+			String res = mailSend(email, title, mailFlag);
+			
+			if(res == "1") return "1";
+		}
+
+		return "0";
+	}
+	
+	// 메일 전송하기
+	public String mailSend(String toMail, String title, String mailFlag) throws MessagingException {
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		String content = "";
+		// 메일 전송을 위한 객체 : MimeMessage(), MimeMessageHelper()
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+		
+		// 메일보관함에 회원이 보내온 메세지들의 정보를 모두 저장시킨 후 작업처리하자...
+		messageHelper.setTo(toMail);
+		messageHelper.setSubject(title);
+		messageHelper.setText(content);
+		
+		// 메세지 보관함의 내용(content)에 발신자의 필요한 정보를 추가로 담아서 전송시켜주면 좋다....
+		content = content.replace("\n", "<br>");
+		content += "<br><hr><h3>"+mailFlag+"</h3><hr><br>";
+		content += "<p><img src=\"cid:main.png\" width='500px'></p>";
+		content += "<p>방문하기 : <a href='49.142.157.251:9090/cjgreen'>JavaProject</a></p>";
+		content += "<hr>";
+		messageHelper.setText(content, true);
+		
+		// 본문에 기재된 그림파일의 경로와 파일명을 별로도 표시한다. 그런후 다시 보관함에 저장한다.
+		FileSystemResource file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/images/main.png"));
+		// FileSystemResource file = new FileSystemResource("D:\\JavaProject\\springframework\\works\\javaProjectS\\src\\main\\webapp\\resources\\images\\main.png");
+		messageHelper.addInline("main.png", file);
+		
+		// 메일 전송하기
+		mailSender.send(message);
+		
+		return "1";
+	}
+	
 }

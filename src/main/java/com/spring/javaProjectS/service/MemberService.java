@@ -12,4 +12,6 @@ public interface MemberService {
 
 	public int setMemberDeleteUpdate(String mid);
 
+	public void setMemberPasswordUpdate(String mid, String pwd);
+
 }

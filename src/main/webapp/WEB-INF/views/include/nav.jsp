@@ -37,10 +37,10 @@
       <div class="w3-dropdown-content w3-bar-block w3-card-4">
 	    <a href="${ctp}/user/userList" class="w3-bar-item w3-button">일정관리</a>
 	    <a href="${ctp}/user2/user2List" class="w3-bar-item w3-button">회원리스트</a>
-	    <a href="#" class="w3-bar-item w3-button">비밀번호변경</a>
+	    <a href="${ctp}/member/memberPwdUpdate" class="w3-bar-item w3-button">비밀번호변경</a>
 	    <a href="#" class="w3-bar-item w3-button">회원정보수정</a>
 	    <a href="${ctp}/member/memberDeleteUpdate" class="w3-bar-item w3-button">회원탈퇴</a>
-	    <a href="#" class="w3-bar-item w3-button">관리자</a>
+	    <c:if test="${sLevel == 0}"><a href="#" class="w3-bar-item w3-button">관리자</a></c:if>
       </div>
     </div>
     </c:if>

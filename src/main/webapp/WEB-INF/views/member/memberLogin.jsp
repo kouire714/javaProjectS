@@ -87,11 +87,16 @@
     	}
     	
     	$.ajax({
-    		url  : "memberPasswordSearch.mem",
+    		url  : "${ctp}/member/memberPasswordSearch",
     		type : "post",
     		data : query,
     		success:function(res) {
-    			passwordShow.innerHTML = "결과메세지 : " + res;
+    			if(res == "1") {
+    				alert("새로운 비밀번호가 회원님 메일로 발송 되었습니다.")
+    			}
+    			else {
+    				alert("등록하신 정보가 잘못되었습니다. 확인 후 다시 전송하세요.")
+    			}
     		},
     		error : function() {
     			alert("전송오류!");
@@ -182,11 +187,6 @@
 	  	    <td colspan="2">
 	  	      <input type="button" value="새비밀번호발급" onclick="passwordFind()" class="btn btn-info" />
 	  	    </td>
-	  	  </tr>
-	  	</table>
-	  	<table class="table table-borderless">
-	  	  <tr>
-	  	    <td><div id="passwordShow"></div></td>
 	  	  </tr>
 	  	</table>
   	</div>

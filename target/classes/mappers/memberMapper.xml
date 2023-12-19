@@ -18,4 +18,8 @@
   	delete from member2 where mid = #{mid};
   </delete>
   
+  <update id="setMemberPasswordUpdate">
+  	update member2 set pwd = #{pwd} where mid = #{mid};
+  </update>
+  
 </mapper>

@@ -34,5 +34,11 @@ public class MemberServiceImpl implements MemberService {
 	public int setMemberDeleteUpdate(String mid) {
 		return memberDAO.setMemberDeleteUpdate(mid);
 	}
+
+	@Override
+	public void setMemberPasswordUpdate(String mid, String pwd) {
+		memberDAO.setMemberPasswordUpdate(mid, pwd);
+		
+	}
 	
 }
