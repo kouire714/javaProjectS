@@ -27,6 +27,7 @@
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 	
+	<!-- 컨트롤러, 서비스객체 등을 스캔 -->
 	<context:component-scan base-package="com.spring.javaProjectS" />
 	
 	<!-- BCryptPasswordEncoder 객체 사용을 위한 Bean 등록 -->

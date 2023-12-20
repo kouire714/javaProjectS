@@ -48,7 +48,7 @@ public class HomeController {
 		response.setCharacterEncoding("utf-8");
 		response.setContentType("text/html; charset=utf-8");
 		
-		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/ckeditor/board/");
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/ckeditor/");
 		String oFileName = upload.getOriginalFilename();
 		
 		Date date = new Date();
@@ -60,7 +60,7 @@ public class HomeController {
 		fos.write(bytes);
 		
 		PrintWriter out = response.getWriter();
-		String fileUrl = request.getContextPath() + "/data/ckeditor/board/" + oFileName;
+		String fileUrl = request.getContextPath() + "/data/ckeditor/" + oFileName;
 		out.println("{\"originalFilename\":\""+oFileName+"\",\"uploaded\":1,\"url\":\""+fileUrl+"\"}");
 		
 		out.flush();

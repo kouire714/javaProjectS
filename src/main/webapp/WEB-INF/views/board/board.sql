@@ -21,6 +21,11 @@ desc board2;
 insert into board2 values (default,'admin','관리맨','게시판서비스를 시작합니다.','kouire2@gmail.com','cjsk1126.tistory.com','게시할 내용들을 입력해 주세요',default,'192.168.50.20',default,default,default);
 select * from board2;
 
+/* content 이미지 폴더 경로변경 */
+select idx,content from board2;
+update board2 set content = replace(content, '/javaProjectS/data/ckeditor/board/', '/javaProjectS/data/board/');
+update board2 set content = replace(content, '/javaProjectS/data/ckeditor/board/', '/javaProjectS/data/board/');
+
 /* 게시판에 댓글 달기 */
 create table board2Reply (
   idx      	int not null auto_increment,	/* 댓글의 고유번호 */
