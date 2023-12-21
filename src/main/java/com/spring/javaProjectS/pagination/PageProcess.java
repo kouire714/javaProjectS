@@ -15,16 +15,21 @@ public class PageProcess {
 		PageVO pageVO = new PageVO();
 		
 		int totRecCnt = 0;
+		String search = "";
 		
 		if(section.equals("board")) {
-			totRecCnt = boardDao.totRecCnt();
+			if(part.equals(""))	totRecCnt = boardDao.totRecCnt();
+			else {
+				search = part;
+				totRecCnt = boardDao.totRecCntSearch(search, searchString);
+			}
 		}
 		
 		int totPage = (totRecCnt % pageSize)==0 ? (totRecCnt / pageSize) : (totRecCnt / pageSize) + 1 ;
 		int startIndexNo = (pag - 1) * pageSize;
 		int curScrStartNo = totRecCnt - startIndexNo;
-
-		int blockSize = 3; 
+		
+		int blockSize = 3;
 		int curBlock = (pag - 1) / blockSize;
 		int lastBlock = (totPage - 1) / blockSize;
 		
@@ -38,10 +43,9 @@ public class PageProcess {
 		pageVO.setCurBlock(curBlock);
 		pageVO.setLastBlock(lastBlock);
 		pageVO.setPart(part);
-		pageVO.setSearch(part);
+		pageVO.setSearch(search);
 		pageVO.setSearchString(searchString);
 		
 		return pageVO;
 	}
-	
 }

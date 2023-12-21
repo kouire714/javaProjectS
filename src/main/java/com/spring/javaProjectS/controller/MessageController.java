@@ -12,6 +12,7 @@ public class MessageController {
 
 	@RequestMapping(value="/message/{msgFlag}", method = RequestMethod.GET)
 	public String msgGet(@PathVariable String msgFlag, String mid, Model model, 
+			@RequestParam(name="temp", defaultValue="", required=false)String temp,
 			@RequestParam(name="idx", defaultValue="0", required=false)int idx,
 			@RequestParam(name="pag", defaultValue="1", required=false) int pag,
 			@RequestParam(name="pagSize", defaultValue="5", required=false) int pageSize) {
@@ -148,6 +149,10 @@ public class MessageController {
 		else if(msgFlag.equals("boardUpdateNo")) {
 			model.addAttribute("msg","게시글이 수정 실패~~.");
 			model.addAttribute("url","board/boardUpdate?idx="+idx+"&pag="+pag+"&pageSize="+pageSize);
+		}
+		else if(msgFlag.equals("validatorError")) {
+			model.addAttribute("msg","user 등록 실패~~" + temp + "를 확인하세요..");
+			model.addAttribute("url","user2/user2List");
 		}
 		
 		return "include/message";
