@@ -12,8 +12,8 @@ public class MessageController {
 
 	@RequestMapping(value="/message/{msgFlag}", method = RequestMethod.GET)
 	public String msgGet(@PathVariable String msgFlag, String mid, Model model, 
-			@RequestParam(name="temp", defaultValue="", required=false)String temp,
-			@RequestParam(name="idx", defaultValue="0", required=false)int idx,
+			@RequestParam(name="temp", defaultValue="", required=false) String temp,
+			@RequestParam(name="idx", defaultValue="0", required=false) int idx,
 			@RequestParam(name="pag", defaultValue="1", required=false) int pag,
 			@RequestParam(name="pagSize", defaultValue="5", required=false) int pageSize) {
 		//System.out.println("mid : " + mid);
