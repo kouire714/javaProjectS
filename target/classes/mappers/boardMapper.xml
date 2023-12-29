@@ -55,7 +55,6 @@
   </insert>
   
   
-  
   <update id="setBoardUpdate">
     update board2 set nickName=#{vo.nickName},title=#{vo.title},email=#{vo.email},homePage=#{vo.homePage},content=#{vo.content},hostIp=#{vo.hostIp},openSw=#{vo.openSw},wDate=now() where idx=#{vo.idx};
   </update>
