@@ -1,22 +1,29 @@
 package com.spring.javaProjectS.service;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.spring.javaProjectS.dao.StudyDAO;
 import com.spring.javaProjectS.dao.User2DAO;
+import com.spring.javaProjectS.vo.KakaoAddressVO;
 import com.spring.javaProjectS.vo.UserVO;
 
 @Service
@@ -125,7 +132,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public UserVO getUserSearchVO(String mid) {
+	public UserVO getUserSearch(String mid) {
 		return user2DAO.getUserSearchVO(mid);
 	}
 
@@ -160,15 +167,161 @@ public class StudyServiceImpl implements StudyService {
 		
 		FileOutputStream fos = new FileOutputStream(realPath + sFileName);
 		/*
-		 * fos.write(fName.getBytes()); 
-		 * fos.close();
-		 */
+		fos.write(fName.getBytes());
+		fos.close();
+		*/
 		if((fName.getBytes().length) != -1) {
 			fos.write(fName.getBytes());
 		}
 		fos.flush();
 		fos.close();
 	}
-	
+
+	@Override
+	public int multiFileUpload(MultipartHttpServletRequest mFile, String[] imgNames) {
+		int res = 0;
+		String imgFiles = "";
+		for(String img : imgNames) imgFiles += img + "/";
+		System.out.println("imgFiles : " + imgFiles);
+		
+		try {
+			List<MultipartFile> fileList = mFile.getFiles("file");
+			String oFileNames = "";
+			String sFileNames = "";
+			
+			for(MultipartFile file : fileList) {
+				String oFileName = file.getOriginalFilename();
+				System.out.println("oFileName : " + oFileName);
+				if(imgFiles.contains(oFileName)) {
+					String sFileName = saveFileName(oFileName);
+					
+					writeFile2(file, sFileName);
+					
+					oFileNames += oFileName + "/";
+					sFileNames += sFileName + "/";
+				}
+			}
+			oFileNames = oFileNames.substring(0, oFileNames.length()-1);
+			sFileNames = sFileNames.substring(0, sFileNames.length()-1);
+			
+			System.out.println("oFileNames : " + oFileNames + " , sFileNames : " + sFileNames);
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+
+	private void writeFile2(MultipartFile file, String sFileName) throws IOException {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
+		
+		byte[] data = file.getBytes();
+		FileOutputStream fos = new FileOutputStream(realPath + sFileName);
+		fos.write(data);
+		fos.close();
+	}
+
+	// 화일명 중복방지를 위한 서버에 저장될 실제 파일명 만들기
+	private String saveFileName(String oFileName) {
+		String fileName = "";
+		
+		Calendar cal = Calendar.getInstance();
+		fileName += cal.get(Calendar.YEAR);
+		fileName += cal.get(Calendar.MONTH);
+		fileName += cal.get(Calendar.DATE);
+		fileName += cal.get(Calendar.HOUR);
+		fileName += cal.get(Calendar.MINUTE);
+		fileName += cal.get(Calendar.SECOND);
+		fileName += cal.get(Calendar.MILLISECOND);
+		fileName += "_" + oFileName;
+		
+		return fileName;
+	}
+
+	@Override
+	public int multiFileUpload(MultipartHttpServletRequest data) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
+		
+		SimpleDateFormat sdf = new SimpleDateFormat ( "yyyyMMddHHmmss");		
+		Date date = new Date();
+		String fileName = "";		// 파일 이름(확장자 제외)
+		String fileFullName = "";	// 파일 이름(확장자 포함)
+		String fileType = "";		// 파일 확장자				
+		String fileUploadTime = sdf.format(date);
+		
+		int res = 0;
+		String imgFiles = "";
+		
+		try {
+			Iterator<String> itr = data.getFileNames();
+			
+			if(itr.hasNext()) {
+				List<MultipartFile> mpf = data.getFiles((String) itr.next());
+				System.out.println("mpf.size : " + mpf.size());
+				for(int i=0; i<mpf.size(); i++) {
+					File file = new File(realPath + mpf.get(i).getOriginalFilename());
+					
+					fileFullName = mpf.get(i).getOriginalFilename();
+					fileName = FilenameUtils.getBaseName(mpf.get(i).getOriginalFilename());
+					fileType = fileFullName.substring(fileFullName.lastIndexOf(".")+1, fileFullName.length());
+					
+					file = new File(realPath + fileName + "_" + fileUploadTime + "." + fileType);
+					
+					mpf.get(i).transferTo(file);
+				}
+			}
+			
+			/*
+			List<MultipartFile> fileList = data.getFiles("file");
+			String oFileNames = "";
+			String sFileNames = "";
+			
+			for(MultipartFile file : fileList) {
+				String oFileName = file.getOriginalFilename();
+				System.out.println("oFileName : " + oFileName);
+				if(imgFiles.contains(oFileName)) {
+					String sFileName = saveFileName(oFileName);
+					
+					writeFile2(file, sFileName);
+					
+					oFileNames += oFileName + "/";
+					sFileNames += sFileName + "/";
+				}
+			}
+			if(fileList.size() != 0) {
+				oFileNames = oFileNames.substring(0, oFileNames.length()-1);
+				sFileNames = sFileNames.substring(0, sFileNames.length()-1);
+			}
+			
+			System.out.println("oFileNames : " + oFileNames + " , sFileNames : " + sFileNames);
+			*/
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+
+	@Override
+	public KakaoAddressVO getKakaoAddressSearch(String address) {
+		return studyDAO.getKakaoAddressSearch(address);
+	}
+
+	@Override
+	public void setKakaoAddressInput(KakaoAddressVO vo) {
+		studyDAO.setKakaoAddressInput(vo);
+	}
+
+	@Override
+	public List<KakaoAddressVO> getKakaoAddressList() {
+		return studyDAO.getKakaoAddressList();
+	}
+
+	@Override
+	public int setKakaoAddressDelete(String address) {
+		return studyDAO.setKakaoAddressDelete(address);
+	}
 	
 }

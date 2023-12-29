@@ -2,7 +2,6 @@ package com.spring.javaProjectS.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -17,6 +16,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.aspectj.lang.annotation.DeclareMixin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,17 +29,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.spring.javaProjectS.common.ARIAUtil;
 import com.spring.javaProjectS.common.SecurityUtil;
 import com.spring.javaProjectS.service.StudyService;
+import com.spring.javaProjectS.vo.KakaoAddressVO;
 import com.spring.javaProjectS.vo.MailVO;
 import com.spring.javaProjectS.vo.UserVO;
 
 @Controller
 @RequestMapping("/study")
 public class StudyController {
-	
+  
 	@Autowired
 	StudyService studyService;
 	
@@ -120,7 +122,7 @@ public class StudyController {
 	@ResponseBody
 	@RequestMapping(value = "/ajax/ajaxTest4_1", method = RequestMethod.POST)
 	public UserVO ajaxTest4_1Post(String mid) {
-		return studyService.getUserSearchVO(mid);
+		return studyService.getUserSearch(mid);
 	}
 	
 	@ResponseBody
@@ -155,7 +157,7 @@ public class StudyController {
 		SecurityUtil security = new SecurityUtil();
 		String encPwd = security.encryptSHA256(pwd+salt);
 		
-		pwd = "원본 비밀번호 : " + pwd + " / solt키 : " + salt + " / 암호화된 비밀번호 : " + encPwd;
+		pwd = "원본 비밀번호 : " + pwd + " / salt키 : " + salt + " / 암호화된 비밀번호 : " + encPwd;
 		
 		return pwd;
 	}
@@ -179,13 +181,12 @@ public class StudyController {
 		
 		pwd = "원본 비밀번호 : " + pwd + "/ salt : " + salt + " / 암호화된 비밀번호 : " + encPwd + " / 복호화된 비밀번호 : " + decPwd;
 		
-		
 		return pwd;
 	}
 	
 	@RequestMapping(value = "/password/bCryptPassword", method = RequestMethod.GET)
 	public String bCryptPasswordGet() {
-		return "study/password/bCrypt";
+		return "study/password/bCryptPassword";
 	}
 	
 	// BcryptPasswordEncoder 암호화
@@ -217,12 +218,12 @@ public class StudyController {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 		
-		// 메일보관함에 회원이 보내온 메세지들의 정보를 모두 저장시킨 후 작업처리하자...
+		// 메일보관함에 회원이 보내온 메세지들의 정보를 모두 저장시킨후 작업처리하자...
 		messageHelper.setTo(toMail);
 		messageHelper.setSubject(title);
 		messageHelper.setText(content);
 		
-		// 메세지 보관함의 내용(content)에 발신자의 필요한 정보를 추가로 담아서 전송시켜주면 좋다....
+		// 메세지 보관함의 내용(content)에, 발신자의 필요한 정보를 추가로 담아서 전송시켜주면 좋다....
 		content = content.replace("\n", "<br>");
 		content += "<br><hr><h3>JavaProjectS 보냅니다.</h3><hr><br>";
 		content += "<p><img src=\"cid:main.jpg\" width='500px'></p>";
@@ -231,18 +232,18 @@ public class StudyController {
 		messageHelper.setText(content, true);
 		
 		// 본문에 기재된 그림파일의 경로와 파일명을 별로도 표시한다. 그런후 다시 보관함에 저장한다.
-		// FileSystemResource file = new FileSystemResource("D:\\JavaProject\\springframework\\works\\javaProjectS\\src\\main\\webapp\\resources\\images\\main.jpg");
-		// request.getSession().getServletContext().getRealPath("");
-		FileSystemResource file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/images/main.png"));
+		//FileSystemResource file = new FileSystemResource("D:\\JavaProject\\springframework\\works\\javaProjectS\\src\\main\\webapp\\resources\\images\\main.jpg");
+		//request.getSession().getServletContext().getRealPath("");
+		FileSystemResource file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/images/main.jpg"));
 		messageHelper.addInline("main.jpg", file);
 		
 		// 첨부파일 보내기
 		file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/images/chicago.jpg"));
 		messageHelper.addAttachment("chicago.jpg", file);
 		
-		// 첨부파일 보내기
 		file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/images/main.zip"));
 		messageHelper.addAttachment("main.zip", file);
+		
 		
 		// 메일 전송하기
 		mailSender.send(message);
@@ -267,7 +268,7 @@ public class StudyController {
 		
 		int res = studyService.fileUpload(fName, mid);
 		
-		// return "study/fileUpload/fileUpload";
+		//return "study/fileUpload/fileUpload";
 		if(res == 1) return "redirect:/message/fileUploadOk";
 		else return "redirect:/message/fileUploadNo";
 	}
@@ -275,7 +276,7 @@ public class StudyController {
 	@ResponseBody
 	@RequestMapping(value = "/fileUpload/fileDelete", method = RequestMethod.POST)
 	public String fileDeletePost(HttpServletRequest request,
-			@RequestParam(name = "file", defaultValue = "", required = false) String fName) {
+			@RequestParam(name="file", defaultValue = "", required=false) String fName) {
 		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
 		
 		int res = 0;
@@ -290,25 +291,149 @@ public class StudyController {
 	}
 	
 	@RequestMapping(value = "/fileUpload/fileDownAction", method = RequestMethod.GET)
-	public void fileDownAction(HttpServletRequest request, /* String file, */ HttpServletResponse response) throws IOException { 
-			String file = request.getParameter("file");
-			String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
-			
-			File downFile = new File(realPath + file);
-			
-			String downFileName = new String(file.getBytes("UTF-8"), "8859_1");
-			response.setHeader("Content-Disposition", "attachment:filename=" + downFileName);
-			
-			FileInputStream fis = new FileInputStream(downFile);
-			ServletOutputStream sos = response.getOutputStream();
-			
-			byte[] bytes = new byte[2048];
-			int data = 0;
-			while((data = fis.read(bytes, 0, bytes.length)) != -1) {
-				sos.write(bytes, 0, data);
-			}
-			sos.flush();
-			sos.close();
-			fis.close();
+	public void fileDownAction(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String file = request.getParameter("file");
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
+		
+		File downFile = new File(realPath + file);
+		
+		String downFileName = new String(file.getBytes("UTF-8"), "8859_1");
+		response.setHeader("Content-Disposition", "attachment:filename=" + downFileName);
+		
+		FileInputStream fis = new FileInputStream(downFile);
+		ServletOutputStream sos = response.getOutputStream();
+		
+		byte[] bytes = new byte[2048];
+		int data = 0;
+		while((data = fis.read(bytes, 0, bytes.length)) != -1) {
+			sos.write(bytes, 0, data);
+		}
+		sos.flush();
+		sos.close();
+		fis.close();
+	}
+	
+	@RequestMapping(value = "/fileUpload/multiFile", method = RequestMethod.GET)
+	public String multiFileGet() {
+		return "study/fileUpload/multiFile";
+	}
+	
+	//@ResponseBody
+	@RequestMapping(value = "/fileUpload/multiFile", method = RequestMethod.POST)
+	public String multiFilePost(MultipartHttpServletRequest mFile, HttpServletRequest request) {
+		
+		String[] imgNames = request.getParameter("imgNames").split("/");
+		
+		int res = studyService.multiFileUpload(mFile, imgNames);
+		
+		if(res == 1) return "redirect:/message/multiFileUploadOk";
+		else return "redirect:/message/multiFileUploadNo";
+		
+		
+		//int res = studyService.multiFileUpload(data);
+		//return "";
+	}
+	
+	@RequestMapping(value = "/fileUpload/fileDeleteAll", method = RequestMethod.GET)
+	public String fileDeleteAllGet() {
+		return "redirect:/message/fileDeleteAllOk";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/fileUpload/fileDeleteAll", method = RequestMethod.POST)
+	public String fileDeleteAllPost(HttpServletRequest request,
+			@RequestParam(name="file", defaultValue = "", required=false) String fName) {
+		int res = 0;
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/study/");
+		File targetFolder = new File(realPath);
+		
+		if(!targetFolder.exists()) {
+      System.out.println(targetFolder + " 경로가 존재하지 않습니다.");
+      return res + "";
+		}
+		
+		File[] files = targetFolder.listFiles();
+		if(files.length != 0) {
+	    for(File file : files) {
+	        if(!file.isDirectory()) {
+	        	file.delete();
+	        }
+	    }
+			res = 1;
+		}
+		//File file = new File(realPath + fName);
+		//if(file.exists()) {
+		//	file.delete();
+		//	res = 1;
+		//}
+		
+		return res + "";
+	}
+	
+	// 카카오맵 연습 기본
+	@RequestMapping(value = "/kakao/kakaomap", method = RequestMethod.GET)
+	public String kakaomapGet() {
+		return "study/kakao/kakaomap";
+	}
+	
+	// 카카오맵 연습1
+	@RequestMapping(value = "/kakao/kakaoEx1", method = RequestMethod.GET)
+	public String kakaoEx1Get() {
+		return "study/kakao/kakaoEx1";
+	}
+	
+	// 카카오맵 연습1(선택한 지점명을 DB에 저장하기)
+	@ResponseBody
+	@RequestMapping(value = "/kakao/kakaoEx1", method = RequestMethod.POST)
+	public String kakaoEx1Post(KakaoAddressVO vo) {
+		KakaoAddressVO searchVO = studyService.getKakaoAddressSearch(vo.getAddress());
+		
+		if(searchVO != null) return "0";
+		
+		studyService.setKakaoAddressInput(vo);
+		
+		return "1";
+	}
+	
+	// 카카오맵 연습2(MyDB에 저장된 주소목록 가져오기 / 지점검색하기 추가)
+	@RequestMapping(value = "/kakao/kakaoEx2", method = RequestMethod.GET)
+	public String kakaoEx2Get(Model model,
+			@RequestParam(name="address", defaultValue = "", required = false) String address) {
+		KakaoAddressVO vo = new KakaoAddressVO();
+		List<KakaoAddressVO> vos = studyService.getKakaoAddressList();
+		
+		if(address.equals("")) {
+			vo.setLatitude(36.63510627148798);
+			vo.setLongitude(127.4595239897276);
+		}
+		else {
+		  vo = studyService.getKakaoAddressSearch(address);
+		}
+		
+		model.addAttribute("vos", vos);
+		model.addAttribute("vo", vo);
+		
+		return "study/kakao/kakaoEx2";
+	}
+	
+	// 카카오맵 연습2(MyDB에 저장된 주소 삭제하기)
+	@ResponseBody
+	@RequestMapping(value = "/kakao/kakaoAddressDelete", method = RequestMethod.POST)
+	public String kakaoEx2Post(
+			@RequestParam(name="address", defaultValue = "", required = false) String address) {
+		int res = 0;
+		System.out.println("address" + address);
+		res = studyService.setKakaoAddressDelete(address);
+		
+		return res + "";
+	}
+	
+	// 카카오맵 연습3(KakaoDB에 저장된 지명으로 검색 후 MyDB에 주소 저장하기)
+	@RequestMapping(value = "/kakao/kakaoEx3", method = RequestMethod.GET)
+	public String kakaoEx3Get(Model model,
+			@RequestParam(name="address", defaultValue = "청주시청", required = false) String address) {
+		model.addAttribute("address", address);
+		
+		return "study/kakao/kakaoEx3";
 	}
 }
